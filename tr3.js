@@ -31,9 +31,8 @@ tr3.prototype.clear = function(back)
  * - (optional) color of the foreground
  * - (optional) x-coordinate of the tree root
  * - (optional) y-coordinate of the tree root
- * - (optional) angle of the tree growth
  */
-tr3.prototype.render = function(renderer,back,front,startx,starty,angle)
+tr3.prototype.render = function(renderer,back,front,startx,starty)
 {
 	var w = this.w;
 	var h = this.h;
@@ -42,7 +41,6 @@ tr3.prototype.render = function(renderer,back,front,startx,starty,angle)
 	front = front ? front : "#000000";
 	startx = startx ? startx : w/2;
 	starty = starty ? starty : 0.95 * h;
-	angle = angle ? angle : 0;
 
 	this.clear(back);
 	
@@ -54,9 +52,6 @@ tr3.prototype.render = function(renderer,back,front,startx,starty,angle)
 	switch (renderer)
 	{
 		case 0:
-			this.SIMPLE(1, context, startx, starty);
-			break;
-		case 1:
 			this.SKETCH(1, context, startx, starty);
 			break;
 		default:
@@ -67,37 +62,6 @@ tr3.prototype.render = function(renderer,back,front,startx,starty,angle)
 tr3.prototype.sign = function()
 {
 	return Math.random() < 0.5 ? -1 : 1;
-};
-
-/**
- * Simple tree rendering
- */
-tr3.prototype.SIMPLE = function(level,context,fromx,fromy,tox,toy,w,h)
-{
-    if (level === 1) {
-    	tox = fromx;
-		h = (fromy - 10) / (Math.random() + 3);
-		toy = fromy - h;
-		w = 80;
-    }
-
-    context.lineWidth = (7 - level) > 0 ? (7 - level) : 1;
-
-    context.beginPath();
-    context.moveTo(fromx, fromy);
-    context.lineTo(tox, toy);
-    context.stroke();
-
-    if (level === 7) {
-    	return;
-    }
-
-    h = h / 2;
-
-    var branches = 2 + Math.random() * 2;
-    for (var i = 0; i < branches; ++i) {
-    	this.SIMPLE(level + 1, context, tox, toy, tox + this.sign() * Math.random() * w, toy - h + this.sign() * Math.random() * h, w, h);	
-    }
 };
 
 /**
