@@ -54,9 +54,12 @@ tr3.prototype.render = function(tree,renderer,back,front,startx,starty)
     this[tree](renderer, 1, startx, starty);
 };
 
-tr3.prototype.sign = function()
+/**
+ * Signed random from -1 to 1
+ */
+tr3.prototype.random = function()
 {
-    return Math.random() < 0.5 ? -1 : 1;
+    return (Math.random() < 0.5 ? -1 : 1) * Math.random();
 };
 
 /**
@@ -66,7 +69,7 @@ tr3.prototype.SKETCH = function(level,fromx,fromy,tox,toy,w,h)
 {
     this.context.beginPath();
     this.context.moveTo(fromx, fromy);
-    this.context.bezierCurveTo(tox + this.sign() * Math.random() * w, toy + this.sign() * Math.random() * h, tox + this.sign() * Math.random() * w, toy + this.sign() * Math.random() * h, tox, toy);
+    this.context.bezierCurveTo(tox + this.random() * w, toy + this.random() * h, tox + this.random() * w, toy + this.random() * h, tox, toy);
     this.context.stroke();
 };
 
@@ -103,7 +106,7 @@ tr3.prototype.TREE_SAVANNAH1 = function(renderer,level,fromx,fromy,tox,toy,w,h)
     h = h / 2;
     var branches = 2 + Math.random() * 2;
     for (var i = 0; i < branches; ++i) {
-        this.TREE_SAVANNAH1(renderer, level + 1, tox, toy, tox + this.sign() * Math.random() * w, toy - h + this.sign() * Math.random() * h, w, h);   
+        this.TREE_SAVANNAH1(renderer, level + 1, tox, toy, tox + this.random() * w, toy - h + this.random() * h, w, h);   
     }
 };
 
@@ -119,8 +122,8 @@ tr3.prototype.TREE_SAVANNAH2 = function(renderer,level,fromx,fromy,tox,toy,w,h)
         w = 80;
     }
 
-    tox = tox + this.sign() * Math.random() * w;
-    toy = toy + this.sign() * Math.random() * h/2;
+    tox = tox + this.random() * w;
+    toy = toy + this.random() * h/2;
 
     var lineWidth = 25;
     for (var i = 0; i < level; i++) {
@@ -136,6 +139,106 @@ tr3.prototype.TREE_SAVANNAH2 = function(renderer,level,fromx,fromy,tox,toy,w,h)
 
     h = h / 2;
     for (var i = 0; i < 1 + Math.random() * 10; ++i) {
-        this.TREE_SAVANNAH2(renderer, level + 1, tox, toy, tox + this.sign() * Math.random() * w, toy - h + this.sign() * Math.random() * h, w * 0.9, h * 0.9);
+        this.TREE_SAVANNAH2(renderer, level + 1, tox, toy, tox + this.random() * w, toy - h + this.random() * h, w * 0.9, h * 0.9);
     }
+};
+
+/**
+ * OAK tree structure preset
+ */
+tr3.prototype.TREE_OAK = function(renderer,level,fromx,fromy,l,angle)
+{
+    var tox, toy;
+    if (level === 1) {
+        l = (fromy - 10) / (3 + Math.random());
+        angle = this.random() * (Math.PI/6);
+    }
+
+    var xOffset = l * Math.sin(angle);
+    var yOffset = l * Math.cos(angle);
+    tox = fromx + xOffset;
+    toy = fromy - yOffset;
+
+    var lineWidth = 35;
+    for (var i = 0; i < level; i++) {
+        lineWidth /= 1.9;
+    }
+    this.context.lineWidth = lineWidth;
+
+
+    this[renderer](level, fromx, fromy, tox, toy, Math.random() * l, Math.random() * l);
+
+    if (level >= 7) {
+        return;
+    }
+
+    var branchCount = 5 + Math.random() * 5;
+    var minAngle = -1 * Math.PI / 2;
+    var angleOffset = (Math.abs(minAngle) - minAngle) / branchCount;
+    for (var i = 0; i < branchCount; ++i) {
+        var branchAngle = angle + (minAngle + i * angleOffset);
+        if (Math.abs(branchAngle) > Math.PI/2) {
+            if (branchAngle > 0) {
+                branchAngle = Math.PI/2 + (Math.random() * (Math.PI / 7));
+            } else {
+                branchAngle = -Math.PI/2 - (Math.random() * (Math.PI / 7));
+            }
+        }
+        this.TREE_OAK(renderer, level+1, tox, toy, l / (1.2 + (Math.random() * 1.3)), branchAngle);
+    }
+
+};
+
+/**
+ * PALM tree structure preset
+ */
+tr3.prototype.TREE_PALM = function(renderer,level,fromx,fromy,l,angle)
+{
+    if (level == 1) {
+        var rootCount = 1 + Math.random() * 3;
+        for (var r = 0; r < rootCount; ++r) {
+            l = (fromy * 0.8) - (Math.random() * (fromy / 2));
+            angle = this.random() * (Math.PI/6);
+            this.TREE_PALM(renderer, 2, fromx, fromy, l, angle);
+        }
+        return;
+    }
+
+    var tox, toy;
+    var xOffset = l * Math.sin(angle);
+    var yOffset = l * Math.cos(angle);
+    tox = fromx + xOffset;
+    toy = fromy - yOffset;
+
+    var lineWidth = 35;
+    for (var i = 0; i < level; i++) {
+        lineWidth /= 1.9;
+    }
+    this.context.lineWidth = lineWidth;
+
+    if (level == 1) {
+        this[renderer](level, fromx, fromy, tox, toy, 0, 0);
+    } else {
+        this[renderer](level, fromx, fromy, tox, toy, 0, 0);
+    }
+
+    if (level >= 1) {
+        return;
+    }
+
+    var branchCount = 5 + Math.random() * 5;
+    var minAngle = -1 * Math.PI / 2;
+    var angleOffset = (Math.abs(minAngle) - minAngle) / branchCount;
+    for (var i = 0; i < branchCount; ++i) {
+        var branchAngle = angle + (minAngle + i * angleOffset);
+        if (Math.abs(branchAngle) > Math.PI/2) {
+            if (branchAngle > 0) {
+                branchAngle = Math.PI/2 + (Math.random() * (Math.PI / 7));
+            } else {
+                branchAngle = -Math.PI/2 - (Math.random() * (Math.PI / 7));
+            }
+        }
+        this.TREE_PALM(renderer, level+1, tox, toy, l / (1.2 + (Math.random() * 1.3)), branchAngle);
+    }
+
 };
