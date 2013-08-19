@@ -33,7 +33,7 @@ tr3.prototype.clear = function(back)
  * - (optional) x-coordinate of the tree root
  * - (optional) y-coordinate of the tree root
  */
-tr3.prototype.render = function(tree,renderer,back,front,startx,starty)
+tr3.prototype.render = function(tree,back,front,startx,starty)
 {
     var w = this.w;
     var h = this.h;
@@ -51,7 +51,7 @@ tr3.prototype.render = function(tree,renderer,back,front,startx,starty)
     context.lineCap = 'round';
 
     // invoke the tree preset function
-    this[tree](renderer, 1, startx, starty);
+    this[tree](1, startx, starty);
 };
 
 /**
@@ -65,7 +65,7 @@ tr3.prototype.random = function()
 /**
  * Sketchy rendering
  */
-tr3.prototype.SKETCH = function(level,fromx,fromy,tox,toy,w,h)
+tr3.prototype.sketch = function(level,fromx,fromy,tox,toy,w,h)
 {
     this.context.beginPath();
     this.context.moveTo(fromx, fromy);
@@ -74,20 +74,9 @@ tr3.prototype.SKETCH = function(level,fromx,fromy,tox,toy,w,h)
 };
 
 /**
- * Simple line rendering
- */
-tr3.prototype.LINE = function(level,fromx,fromy,tox,toy,w,h)
-{
-    this.context.beginPath();
-    this.context.moveTo(fromx, fromy);
-    this.context.lineTo(tox, toy);
-    this.context.stroke();
-};
-
-/**
  * SAVANNAH1 tree structure preset
  */
-tr3.prototype.TREE_SAVANNAH1 = function(renderer,level,fromx,fromy,tox,toy,w,h)
+tr3.prototype.TREE_SAVANNAH1 = function(level,fromx,fromy,tox,toy,w,h)
 {
     if (level === 1) {
         tox = fromx;
@@ -97,7 +86,7 @@ tr3.prototype.TREE_SAVANNAH1 = function(renderer,level,fromx,fromy,tox,toy,w,h)
     }
 
     this.context.lineWidth = (7 - level) > 0 ? (7 - level) : 1;
-    this[renderer](level, fromx, fromy, tox, toy, w, h);
+    this.sketch(level, fromx, fromy, tox, toy, w, h);
 
     if (level === 6) {
         return;
@@ -106,14 +95,14 @@ tr3.prototype.TREE_SAVANNAH1 = function(renderer,level,fromx,fromy,tox,toy,w,h)
     h = h / 2;
     var branches = 2 + Math.random() * 2;
     for (var i = 0; i < branches; ++i) {
-        this.TREE_SAVANNAH1(renderer, level + 1, tox, toy, tox + this.random() * w, toy - h + this.random() * h, w, h);   
+        this.TREE_SAVANNAH1(level + 1, tox, toy, tox + this.random() * w, toy - h + this.random() * h, w, h);   
     }
 };
 
 /**
  * SAVANNAH2 tree structure preset
  */
-tr3.prototype.TREE_SAVANNAH2 = function(renderer,level,fromx,fromy,tox,toy,w,h)
+tr3.prototype.TREE_SAVANNAH2 = function(level,fromx,fromy,tox,toy,w,h)
 {
     if (level === 1) {
         tox = fromx;
@@ -131,7 +120,7 @@ tr3.prototype.TREE_SAVANNAH2 = function(renderer,level,fromx,fromy,tox,toy,w,h)
     }
     this.context.lineWidth = lineWidth;
 
-    this[renderer](level, fromx, fromy, tox, toy, w, h);
+    this.sketch(level, fromx, fromy, tox, toy, w, h);
 
     if (level === 6) {
         return;
@@ -139,14 +128,14 @@ tr3.prototype.TREE_SAVANNAH2 = function(renderer,level,fromx,fromy,tox,toy,w,h)
 
     h = h / 2;
     for (var i = 0; i < 1 + Math.random() * 10; ++i) {
-        this.TREE_SAVANNAH2(renderer, level + 1, tox, toy, tox + this.random() * w, toy - h + this.random() * h, w * 0.9, h * 0.9);
+        this.TREE_SAVANNAH2( level + 1, tox, toy, tox + this.random() * w, toy - h + this.random() * h, w * 0.9, h * 0.9);
     }
 };
 
 /**
  * OAK tree structure preset
  */
-tr3.prototype.TREE_OAK = function(renderer,level,fromx,fromy,l,angle)
+tr3.prototype.TREE_OAK = function(level,fromx,fromy,l,angle)
 {
     var tox, toy;
     if (level === 1) {
@@ -166,7 +155,7 @@ tr3.prototype.TREE_OAK = function(renderer,level,fromx,fromy,l,angle)
     this.context.lineWidth = lineWidth;
 
 
-    this[renderer](level, fromx, fromy, tox, toy, Math.random() * l, Math.random() * l);
+    this.sketch(level, fromx, fromy, tox, toy, Math.random() * l, Math.random() * l);
 
     if (level >= 7) {
         return;
@@ -184,7 +173,7 @@ tr3.prototype.TREE_OAK = function(renderer,level,fromx,fromy,l,angle)
                 branchAngle = -Math.PI/2 - (Math.random() * (Math.PI / 7));
             }
         }
-        this.TREE_OAK(renderer, level+1, tox, toy, l / (1.2 + (Math.random() * 1.3)), branchAngle);
+        this.TREE_OAK(level+1, tox, toy, l / (1.2 + (Math.random() * 1.3)), branchAngle);
     }
 
 };
@@ -192,14 +181,14 @@ tr3.prototype.TREE_OAK = function(renderer,level,fromx,fromy,l,angle)
 /**
  * PALM tree structure preset
  */
-tr3.prototype.TREE_PALM = function(renderer,level,fromx,fromy,l,angle)
+tr3.prototype.TREE_PALM = function(level,fromx,fromy,l,angle)
 {
     if (level == 1) {
         var rootCount = 1 + Math.random() * 3;
         for (var r = 0; r < rootCount; ++r) {
             l = (fromy * 0.8) - (Math.random() * (fromy / 2));
             angle = this.random() * (Math.PI/6);
-            this.TREE_PALM(renderer, 2, fromx, fromy, l, angle);
+            this.TREE_PALM(2, fromx, fromy, l, angle);
         }
         return;
     }
@@ -217,9 +206,9 @@ tr3.prototype.TREE_PALM = function(renderer,level,fromx,fromy,l,angle)
     this.context.lineWidth = lineWidth;
 
     if (level == 1) {
-        this[renderer](level, fromx, fromy, tox, toy, 0, 0);
+        this.sketch(level, fromx, fromy, tox, toy, 0, 0);
     } else {
-        this[renderer](level, fromx, fromy, tox, toy, 0, 0);
+        this.sketch(level, fromx, fromy, tox, toy, 0, 0);
     }
 
     if (level >= 1) {
@@ -238,7 +227,7 @@ tr3.prototype.TREE_PALM = function(renderer,level,fromx,fromy,l,angle)
                 branchAngle = -Math.PI/2 - (Math.random() * (Math.PI / 7));
             }
         }
-        this.TREE_PALM(renderer, level+1, tox, toy, l / (1.2 + (Math.random() * 1.3)), branchAngle);
+        this.TREE_PALM(level+1, tox, toy, l / (1.2 + (Math.random() * 1.3)), branchAngle);
     }
 
 };
